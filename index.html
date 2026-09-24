@@ -91,10 +91,7 @@
         }
 
         button:active { transform: scale(0.97); }
-        .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-outline { background-color: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); }
-        .btn-success { background-color: var(--success-color); color: white; display: none; }
-        .btn-danger { background-color: var(--danger-color); color: white; display: none; }
 
         /* منطقة الجدول القابلة للتمرير */
         .table-container {
@@ -181,19 +178,6 @@
         tbody tr:nth-child(even) td:not(.category-cell):not(.type-cell) { background-color: #f8fafc; }
         tbody tr:hover td:not(.category-cell):not(.type-cell) { background-color: #eff6ff; }
 
-        /* خلايا التعديل */
-        [contenteditable="true"] {
-            background-color: #fef3c7 !important;
-            outline: none;
-            color: #92400e !important;
-            border-radius: 4px;
-            box-shadow: inset 0 0 0 1px #f59e0b;
-        }
-        [contenteditable="true"]:focus {
-            background-color: #fde68a !important;
-            box-shadow: inset 0 0 0 2px #d97706;
-        }
-
         /* التذييل */
         .app-footer {
             flex-shrink: 0;
@@ -217,31 +201,6 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
-
-        /* النافذة المنبثقة */
-        .modal-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content {
-            background-color: white; padding: 25px; border-radius: 16px;
-            width: 90%; max-width: 350px; text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-            transform: translateY(20px) scale(0.95); transition: all 0.3s ease;
-        }
-        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
-        .modal-content h3 { margin-bottom: 15px; font-size: 18px; color: var(--primary-color); }
-        .modal-content input {
-            width: 100%; padding: 12px; margin-bottom: 20px;
-            border: 2px solid var(--border-color); border-radius: 10px;
-            font-family: inherit; font-size: 16px; text-align: center;
-            outline: none; transition: border-color 0.2s; letter-spacing: 2px;
-        }
-        .modal-content input:focus { border-color: var(--primary-light); }
 
         /* تعديلات الموبايل */
         @media (max-width: 600px) {
@@ -268,7 +227,7 @@
         @media print {
             body { height: auto; overflow: visible; background: white; padding: 0; display: block; }
             .app-container { height: auto; box-shadow: none; border-radius: 0; max-width: 100%; border: 2px solid #000; }
-            .toolbar, .modal-overlay { display: none !important; }
+            .toolbar { display: none !important; }
             .table-container { overflow: visible; }
             thead th { position: static; background-color: #f0f0f0 !important; color: #000 !important; border: 1px solid #000; }
             tbody td, .category-cell, .type-cell { border: 1px solid #000 !important; position: static !important; box-shadow: none !important; width: auto !important; }
@@ -286,9 +245,6 @@
             <h2>قائمة اسعار التركيب 2025</h2>
         </div>
         <div class="toolbar">
-            <button id="editBtn" class="btn-primary" onclick="openLoginModal()">🔒 <span>تعديل</span></button>
-            <button id="saveBtn" class="btn-success" onclick="saveData()">💾 <span>حفظ</span></button>
-            <button id="cancelBtn" class="btn-danger" onclick="cancelEdit()">❌ <span>إلغاء</span></button>
             <button class="btn-outline" onclick="window.print()">🖨️ <span>طباعة</span></button>
         </div>
     </header>
@@ -326,22 +282,9 @@
             <p>📍 15 ش السلهدار سنتر روكسي - الدور الثاني</p>
         </div>
     </footer>
-
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal-content">
-            <h3>🔐 تسجيل الدخول للمدير</h3>
-            <input type="password" id="passwordInput" placeholder="أدخل كلمة المرور" onkeypress="handleEnter(event)">
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="btn-primary" style="flex: 1;" onclick="checkPassword()">دخول</button>
-                <button class="btn-outline" style="flex: 1;" onclick="closeLoginModal()">إلغاء</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
-    const ADMIN_PASSWORD = "admin123";
-
     const defaultData = [
         { category: "ابيض / انتي", rows: [
             { type: "عادي", full: "30", half: "35", frameless: "40" },
@@ -405,16 +348,7 @@
         ]}
     ];
 
-    let currentData = [];
-    let isEditing = false;
-
     function init() {
-        const savedData = localStorage.getItem('antarOpticPricesModern');
-        if (savedData) {
-            currentData = JSON.parse(savedData);
-        } else {
-            currentData = JSON.parse(JSON.stringify(defaultData));
-        }
         renderTable();
     }
 
@@ -422,7 +356,7 @@
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        currentData.forEach((category, catIndex) => {
+        defaultData.forEach((category) => {
             category.rows.forEach((row, rowIndex) => {
                 const tr = document.createElement('tr');
 
@@ -443,88 +377,19 @@
                 tr.appendChild(tdType);
 
                 // 3. أعمدة الأسعار (متحركة)
-                const createPriceCell = (value, colName) => {
+                const createPriceCell = (value) => {
                     const td = document.createElement('td');
                     td.textContent = value;
-                    td.dataset.cat = catIndex;
-                    td.dataset.row = rowIndex;
-                    td.dataset.col = colName;
                     return td;
                 };
 
-                tr.appendChild(createPriceCell(row.full, 'full'));
-                tr.appendChild(createPriceCell(row.half, 'half'));
-                tr.appendChild(createPriceCell(row.frameless, 'frameless'));
+                tr.appendChild(createPriceCell(row.full));
+                tr.appendChild(createPriceCell(row.half));
+                tr.appendChild(createPriceCell(row.frameless));
 
                 tbody.appendChild(tr);
             });
         });
-    }
-
-    function openLoginModal() {
-        document.getElementById('loginModal').classList.add('active');
-        document.getElementById('passwordInput').value = '';
-        setTimeout(() => document.getElementById('passwordInput').focus(), 100);
-    }
-
-    function closeLoginModal() {
-        document.getElementById('loginModal').classList.remove('active');
-    }
-
-    function handleEnter(event) {
-        if (event.key === 'Enter') checkPassword();
-    }
-
-    function checkPassword() {
-        const password = document.getElementById('passwordInput').value;
-        if (password === ADMIN_PASSWORD) {
-            closeLoginModal();
-            enableEditMode();
-        } else {
-            alert("كلمة المرور غير صحيحة!");
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
-        }
-    }
-
-    function enableEditMode() {
-        isEditing = true;
-        const cells = document.querySelectorAll('#tableBody td[data-col]');
-        cells.forEach(cell => cell.contentEditable = "true");
-
-        document.getElementById('editBtn').style.display = 'none';
-        document.getElementById('saveBtn').style.display = 'flex';
-        document.getElementById('cancelBtn').style.display = 'flex';
-    }
-
-    function cancelEdit() {
-        isEditing = false;
-        init(); 
-        resetButtons();
-    }
-
-    function saveData() {
-        const cells = document.querySelectorAll('#tableBody td[data-col]');
-        cells.forEach(cell => {
-            const catIndex = parseInt(cell.dataset.cat);
-            const rowIndex = parseInt(cell.dataset.row);
-            const colName = cell.dataset.col;
-            currentData[catIndex].rows[rowIndex][colName] = cell.innerText.trim();
-        });
-
-        localStorage.setItem('antarOpticPricesModern', JSON.stringify(currentData));
-        alert("تم حفظ التعديلات بنجاح!");
-        isEditing = false;
-        resetButtons();
-    }
-
-    function resetButtons() {
-        document.getElementById('editBtn').style.display = 'flex';
-        document.getElementById('saveBtn').style.display = 'none';
-        document.getElementById('cancelBtn').style.display = 'none';
-        
-        const cells = document.querySelectorAll('#tableBody td[data-col]');
-        cells.forEach(cell => cell.contentEditable = "false");
     }
 
     window.onload = init;
